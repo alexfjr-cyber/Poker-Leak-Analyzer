@@ -17,7 +17,7 @@ if 'metas_globais' not in st.session_state:
     st.session_state['metas_globais'] = motor.METAS_PADRAO_GLOBAIS.copy()
 
 # -------------------------------------------------------------
-# MENU LATERAL & UPLOAD
+# MENU LATERAL & SINCRONIZAÇÃO
 # -------------------------------------------------------------
 st.sidebar.title("🃏 Painel de Controle")
 st.sidebar.markdown("---")
@@ -54,9 +54,26 @@ if st.sidebar.button("⚡ Processar Dados", type="primary", use_container_width=
     else:
         st.sidebar.warning("Envie os arquivos antes de processar.")
 
+# --- NOVO: BOTÃO DE DOWNLOAD DO TEMPLATE HM2 ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("🛠️ Instalação (HM2)")
+st.sidebar.markdown("Importe este template no seu HM2 para garantir a exportação correta das métricas.")
+
+try:
+    with open("ByPosition.Tournament.Report", "rb") as template_file:
+        st.sidebar.download_button(
+            label="⬇️ Baixar Template HM2",
+            data=template_file,
+            file_name="ByPosition.Tournament.Report",
+            mime="application/octet-stream",
+            use_container_width=True
+        )
+except FileNotFoundError:
+    st.sidebar.warning("Arquivo de template não encontrado no servidor.")
+# -----------------------------------------------
+
 df_banco = st.session_state['df_banco']
 METAS_GLOBAIS = st.session_state['metas_globais']
-
 if df_banco.empty and menu != "⚙️ Configuração de Metas":
     st.info("👋 **Bem-vindo ao Head Coach Virtual!**")
     st.warning("👈 Envie seus arquivos CSV do Hold'em Manager 2 no menu lateral para gerar os diagnósticos.")
