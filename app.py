@@ -60,7 +60,7 @@ st.sidebar.subheader("🛠️ Instalação (HM2)")
 st.sidebar.markdown("Importe este template no seu HM2 para garantir a exportação correta das métricas.")
 
 try:
-    with open("ByPosition.Tournament.Report", "rb") as template_file:
+    with open("ByPosition.Tournament.Report.zip", "rb") as template_file:
         st.sidebar.download_button(
             label="⬇️ Baixar Template HM2",
             data=template_file,
