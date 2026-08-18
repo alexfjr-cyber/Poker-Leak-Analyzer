@@ -5,15 +5,16 @@ def desenhar_grafico_winrate_pareado(eixo_x, bb_real, ev_bb, titulo):
     cores_bb = ['#00e676' if val >= 0 else '#ff1744' for val in bb_real]
     cores_ev = ['#ffd600' if ev > bb else '#b388ff' for ev, bb in zip(ev_bb, bb_real)]
 
-    # 1. Adicionamos as barras físicas, mas escondemos elas da legenda (showlegend=False)
+    # 1. Adicionamos as barras físicas normais (escondidas da legenda)
     fig.add_trace(go.Bar(x=eixo_x, y=bb_real, marker_color=cores_bb, text=[f"{val:+.1f}" for val in bb_real], textposition='outside', showlegend=False))
     fig.add_trace(go.Bar(x=eixo_x, y=ev_bb, marker_color=cores_ev, text=[f"{val:+.1f}" for val in ev_bb], textposition='outside', showlegend=False))
 
-    # 2. Criamos 4 marcadores "fantasmas" apenas para montar uma legenda explicativa e detalhada
-    fig.add_trace(go.Bar(x=[None], y=[None], name='bb/100 (Lucro)', marker_color='#00e676'))
-    fig.add_trace(go.Bar(x=[None], y=[None], name='bb/100 (Prejuízo)', marker_color='#ff1744'))
-    fig.add_trace(go.Bar(x=[None], y=[None], name='EV (Bad Run / Azar)', marker_color='#ffd600'))
-    fig.add_trace(go.Bar(x=[None], y=[None], name='EV (Good Run / Sorte)', marker_color='#b388ff'))
+    # 2. Criamos a legenda usando "Marcadores" (Scatter/Quadrados) em vez de Barras. 
+    # Isso impede que o gráfico reserve espaço em branco entre as colunas!
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode='markers', marker=dict(color='#00e676', symbol='square', size=15), name='bb/100 (Lucro)'))
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode='markers', marker=dict(color='#ff1744', symbol='square', size=15), name='bb/100 (Prejuízo)'))
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode='markers', marker=dict(color='#ffd600', symbol='square', size=15), name='EV (Bad Run / Azar)'))
+    fig.add_trace(go.Scatter(x=[None], y=[None], mode='markers', marker=dict(color='#b388ff', symbol='square', size=15), name='EV (Good Run / Sorte)'))
 
     fig.update_layout(
         title=f"📊 {titulo}", 
@@ -26,7 +27,7 @@ def desenhar_grafico_winrate_pareado(eixo_x, bb_real, ev_bb, titulo):
         xaxis=dict(type='category', gridcolor='rgba(255,255,255,0.05)')
     )
     return fig
-
+    
 def desenhar_evolucao_anual(df_ano, metrica, titulo, posicoes=None):
     fig = go.Figure()
     df_temporal = df_ano[df_ano['Mes'] != 'Geral'].copy()
