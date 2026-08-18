@@ -5,10 +5,26 @@ def desenhar_grafico_winrate_pareado(eixo_x, bb_real, ev_bb, titulo):
     cores_bb = ['#00e676' if val >= 0 else '#ff1744' for val in bb_real]
     cores_ev = ['#ffd600' if ev > bb else '#b388ff' for ev, bb in zip(ev_bb, bb_real)]
 
-    fig.add_trace(go.Bar(x=eixo_x, y=bb_real, name='bb/100 Real', marker_color=cores_bb, text=[f"{val:+.1f}" for val in bb_real], textposition='outside'))
-    fig.add_trace(go.Bar(x=eixo_x, y=ev_bb, name='EV bb/100 (Habilidade)', marker_color=cores_ev, text=[f"{val:+.1f}" for val in ev_bb], textposition='outside'))
+    # 1. Adicionamos as barras físicas, mas escondemos elas da legenda (showlegend=False)
+    fig.add_trace(go.Bar(x=eixo_x, y=bb_real, marker_color=cores_bb, text=[f"{val:+.1f}" for val in bb_real], textposition='outside', showlegend=False))
+    fig.add_trace(go.Bar(x=eixo_x, y=ev_bb, marker_color=cores_ev, text=[f"{val:+.1f}" for val in ev_bb], textposition='outside', showlegend=False))
 
-    fig.update_layout(title=f"📊 {titulo}", barmode='group', plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="right", x=1), yaxis=dict(title='bb / 100 mãos', gridcolor='rgba(255,255,255,0.1)', zeroline=True, zerolinecolor='rgba(255,255,255,0.3)'), xaxis=dict(type='category', gridcolor='rgba(255,255,255,0.05)'))
+    # 2. Criamos 4 marcadores "fantasmas" apenas para montar uma legenda explicativa e detalhada
+    fig.add_trace(go.Bar(x=[None], y=[None], name='bb/100 (Lucro)', marker_color='#00e676'))
+    fig.add_trace(go.Bar(x=[None], y=[None], name='bb/100 (Prejuízo)', marker_color='#ff1744'))
+    fig.add_trace(go.Bar(x=[None], y=[None], name='EV (Bad Run / Azar)', marker_color='#ffd600'))
+    fig.add_trace(go.Bar(x=[None], y=[None], name='EV (Good Run / Sorte)', marker_color='#b388ff'))
+
+    fig.update_layout(
+        title=f"📊 {titulo}", 
+        barmode='group', 
+        plot_bgcolor='rgba(0,0,0,0)', 
+        paper_bgcolor='rgba(0,0,0,0)', 
+        font=dict(color='white'), 
+        legend=dict(orientation="h", yanchor="bottom", y=1.15, xanchor="right", x=1), 
+        yaxis=dict(title='bb / 100 mãos', gridcolor='rgba(255,255,255,0.1)', zeroline=True, zerolinecolor='rgba(255,255,255,0.3)'), 
+        xaxis=dict(type='category', gridcolor='rgba(255,255,255,0.05)')
+    )
     return fig
 
 def desenhar_evolucao_anual(df_ano, metrica, titulo, posicoes=None):
