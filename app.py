@@ -60,16 +60,17 @@ st.sidebar.subheader("🛠️ Instalação (HM2)")
 st.sidebar.markdown("Importe este template no seu HM2 para garantir a exportação correta das métricas.")
 
 try:
+    # 1. Abre o arquivo .zip correto
     with open("ByPosition.Tournament.Report.zip", "rb") as template_file:
         st.sidebar.download_button(
-            label="⬇️ Baixar Template HM2",
+            label="⬇️ Baixar Template HM2 (.zip)",
             data=template_file,
-            file_name="ByPosition.Tournament.Report",
-            mime="application/octet-stream",
+            file_name="ByPosition.Tournament.Report.zip", # 2. Força o navegador a salvar como .zip
+            mime="application/zip", # 3. Avisa o navegador que é uma pasta compactada
             use_container_width=True
         )
 except FileNotFoundError:
-    st.sidebar.warning("Arquivo de template não encontrado no servidor.")
+    st.sidebar.warning("Arquivo de template (.zip) não encontrado no servidor.")
 # -----------------------------------------------
 
 df_banco = st.session_state['df_banco']
