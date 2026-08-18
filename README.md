@@ -1,1 +1,1 @@
-# Poker-Leak-Analizer
+# Poker-Leak-Analyzer
