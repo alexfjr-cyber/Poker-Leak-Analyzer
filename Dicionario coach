@@ -1,0 +1,51 @@
+### 📚 BASE DE CONHECIMENTO DO HEAD COACH: SNG TURBO (30BB)
+
+#### 1. RFI (Open Raise)
+* EP (15% a 17%): 
+  * Análise: O range deve ser tight. Abrir muitas mãos marginais do UTG com 25-30bb atrai muitos 3-bet shoves, forçando você a foldar e queimar fichas cruciais.
+* MP (20% a 23%): 
+  * Análise: O range expande levemente incluindo broadways (cartas altas), ases suited (A2s+) e pares baixos, mas sem grandes loucuras.
+* CO (30% a 33%): 
+  * Análise: Início da zona de ataque. Abertura obrigatória com todos os conectores naipados médios e todos os Ases.
+* BU (48% a 55%): 
+  * Análise: Posição mais lucrativa. Mais da metade das mãos iniciais devem ser abertas para punir blinds passivos.
+* SB (45% a 50%): 
+  * Análise: Depende da estratégia. Se usa "Limp/Raise", fica em ~45%. Se joga "Raise/Fold" puro, deve bater 50-55%.
+
+#### 2. Frequências de 3-Bet
+* EP/MP (4% a 6%): 
+  * Análise: Focado estritamente em valor (QQ+, AK). Quem abre de posições iniciais costuma ter mãos muito fortes, não faz sentido blefar muito aqui.
+* CO (7% a 9%): 
+  * Análise: Introdução de 3-bets lights com blockers (ex: A5s) para pressionar aberturas do MP.
+* BU (10% a 12%): 
+  * Análise: Posição ideal para punir jogadores do Cutoff que estão abrindo muito largo.
+* SB (12% a 14%): 
+  * Análise: Por jogar fora de posição no pós-flop, o SB deve dar muitos 3-bets (por valor ou shove light) e pouquíssimos "flat calls".
+* BB (14% a 18%): 
+  * Análise: Frequência altíssima obrigatória. É necessário defender o blind indo All-in (Re-steal) contra aberturas do Botão e SB usando Kxs, Axs e conectores.
+
+#### 3. Reações a 3-Bet (Quando somos o Agressor - RFI)
+* Fold to 3-Bet (45% a 55%): 
+  * Análise: Foldar mais de 55% te torna um alvo fácil e lucrativo para blefes oponentes. Foldar menos de 45% significa pagar fora de posição e queimar fichas preciosas.
+* Call 3-Bet (25% a 35%): 
+  * Análise: Call com 30bb deve ser feito quase que exclusivamente quando se tem posição (ex: abriu do BU e o BB 3-betou) com mãos que flopam muito bem.
+* 4-Bet (10% a 15%): 
+  * Análise: Com 30bb, seu 4-Bet é quase 100% um All-in polarizado (Monstros como QQ+/AK e Blefes com blockers como A2s-A5s). Abaixo de 8%, seu jogo está excessivamente passivo.
+
+#### 4. Defesa do Big Blind (BB)
+* Fold vs Steal (45% a 55%): 
+  * Análise: Deve-se defender quase metade das mãos contra CO, BU e SB.
+* Call vs Steal (35% a 40%): 
+  * Análise: Principal arma de defesa com 30bb. Pagamos com mãos marginais (J8s, 97s, Q9o) já que o 3-bet shove custaria muito caro.
+* Raise vs Steal / 3-Bet (12% a 15%): 
+  * Análise: O clássico Re-Steal. Monstros + blefes com blockers (As ou Rei). O foco é roubar o pote pré-flop sem ver as cartas comunitárias.
+* Call Geral BB (25% a 30%): 
+  * Análise: Menor que o Call vs Steal, pois aqui filtramos o respeito que devemos ter quando EP e MP abrem a mão.
+
+#### 5. Pós-Flop
+* C-Bet Flop IP - Em Posição (55% a 65%): 
+  * Análise: Com vantagem de range e posição, abuse de C-Bets pequenos (25-33% do pote) para preparar um All-in futuro.
+* C-Bet Flop OOP - Fora de Posição (35% a 45%): 
+  * Análise: A tendência GTO moderna é dar muito mais "Check" fora de posição, mesmo sendo o agressor pré-flop, para proteger seu range contra floaters.
+* Check-Raise Flop (12% a 16%): 
+  * Análise: Métrica de alta lucratividade. Utilizar pedidas (draws) ou bottom-pairs para fazer check-raise com 30bb coloca uma pressão brutal de ICM no oponente. Abaixo de 8% indica jogo "Fit or Fold" (só aposta quando acerta).
