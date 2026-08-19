@@ -6,14 +6,14 @@ MAPA_MESES = {'01': 'Janeiro', '02': 'Fevereiro', '03': 'Março', '04': 'Abril',
 
 # 🔥 DIGITE AQUI O SEU PADRÃO ATUALIZADO ANTES DE IR PARA A NUVEM
 METAS_PADRAO_GLOBAIS = {
-    'RFI_EP': 19.0, 'RFI_MP': 24.0, 'RFI_CO': 35.0, 'RFI_BU': 50.0, 'RFI_SB': 60.0,
-    '3Bet_EP': 6.0, '3Bet_MP': 8.0, '3Bet_CO': 10.0, '3Bet_BU': 12.0, '3Bet_SB': 14.0, '3Bet_BB': 11.0,
+    'RFI_EP': 18.0, 'RFI_MP': 23.0, 'RFI_CO': 33.0, 'RFI_BU': 50.0, 'RFI_SB': 50.0,
+    '3Bet_EP': 5.5, '3Bet_MP': 7.0, '3Bet_CO': 8.0, '3Bet_BU': 11.0, '3Bet_SB': 13.0, '3Bet_BB': 15.0,
     'VPIP': 25.0, 'PFR': 22.0,
-    'FoldTo3Bet': 45.0, 'FourBet': 12.0, 'FoldTo4Bet': 50.0, '3Bet': 10.0,
+    'FoldTo3Bet': 50.0, 'FourBet': 12.0, 'FoldTo4Bet': 50.0, '3Bet': 10.0,
     'BB_Fold_Steal': 35.0, 'BB_3Bet_Steal': 14.0, 'SB_Steal': 60.0,
     'BB_Defend_SB_Steal': 60.0, 'BB_Raise_SB_Steal': 15.0,
-    'CBetFlop': 60.0, 'CBetFlopIP': 70.0, 'CBetFlopOOP': 45.0,
-    'CheckRaiseFlop': 12.0, 'BetFlopSkippedCBet': 70.0,
+    'CBetFlop': 60.0, 'CBetFlopIP': 65.0, 'CBetFlopOOP': 40.0,
+    'CheckRaiseFlop': 13.5, 'BetFlopSkippedCBet': 70.0,
     'Agg': 2.5, 'WTSD': 30.0, 'WSD': 52.0
 }
 
