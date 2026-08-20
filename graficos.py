@@ -47,23 +47,86 @@ def desenhar_evolucao_anual(df_ano, metrica, titulo, posicoes=None):
     fig.update_layout(title=f"📈 {titulo}", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), hovermode="x unified", yaxis=dict(gridcolor='rgba(255,255,255,0.1)'), xaxis=dict(type='category', gridcolor='rgba(255,255,255,0.05)'))
     return fig
 
-def desenhar_grafico_stat_vs_meta(posicoes, valores_real, valores_meta, nome_stat, mes, ano):
+import plotly.graph_objects as go
+
+def desenhar_grafico_stat_vs_meta(eixos_x, valores_reais, valores_meta, nome_stat, periodo, ano):
     fig = go.Figure()
-    
-    # 1. Adiciona a barra real PRIMEIRO para o gráfico entender que o eixo X é texto (posições)
-    fig.add_trace(go.Bar(x=posicoes, y=valores_real, name=f'Real ({mes})', marker_color='#2979ff', width=0.5, text=[f"{v:.1f}%" for v in valores_real], textposition='outside'))
-    
-    # 2. Marcador Fake apenas para aparecer na Legenda (usando a primeira posição para não quebrar o eixo)
-    fig.add_trace(go.Scatter(x=[posicoes[0]], y=[None], mode='lines', name='🎯 Meta Ideal', line=dict(color='#ffea00', width=4)))
 
-    # 3. Desenho das linhas físicas que sobrepõem as barras
-    shapes = []
-    for i, meta in enumerate(valores_meta):
-        shapes.append(dict(type="line", x0=i-0.4, x1=i+0.4, y0=meta, y1=meta, line=dict(color="#ffea00", width=4), xref="x", yref="y", layer="above"))
+    # Lógica de cor dinâmica: Verde Neon se o desvio for aceitável (<= 2%), Rosa/Vermelho Neon se for Leak Grave
+    cores_barras = ['#00e676' if abs(r - m) <= 2.0 else '#ff1744' for r, m in zip(valores_reais, valores_meta)]
 
-    fig.update_layout(title=f"🎯 {nome_stat} por Posição: Real vs Meta — {mes}/{ano}", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font=dict(color='white'), yaxis=dict(title=f'% de {nome_stat}', gridcolor='rgba(255,255,255,0.1)'), xaxis=dict(type='category', gridcolor='rgba(255,255,255,0.05)'), shapes=shapes)
+    # 1. A Barra Real (Cantos arredondados, leve transparência e borda forte para dar "Glow")
+    fig.add_trace(go.Bar(
+        x=eixos_x,
+        y=valores_reais,
+        name=f"{nome_stat} Real",
+        marker=dict(
+            color=cores_barras,
+            opacity=0.75,
+            line=dict(color=cores_barras, width=2) # Borda luminosa
+        ),
+        text=[f"{v:.1f}%" for v in valores_reais],
+        textposition='outside',
+        textfont=dict(color='white', size=13, family="Arial Black"),
+        hovertemplate="<b>Posição: %{x}</b><br>Realizado: %{y:.1f}%<extra></extra>"
+    ))
+
+    # 2. A Linha da Meta (Linha pontilhada luminosa com formato de diamante, flutuando sobre as barras)
+    fig.add_trace(go.Scatter(
+        x=eixos_x,
+        y=valores_meta,
+        name="Meta Ideal",
+        mode='lines+markers',
+        line=dict(color='#00e5ff', width=3, dash='dot'), # Ciano Neon (Azul claro brilhante)
+        marker=dict(symbol='diamond', size=12, color='#0e1117', line=dict(width=2, color='#00e5ff')),
+        hovertemplate="Meta: %{y:.1f}%<extra></extra>"
+    ))
+
+    # 3. Layout Premium: Limpeza de fundo, tipografia moderna e legenda encaixada
+    fig.update_layout(
+        title=dict(
+            text=f"<b>{nome_stat}</b>: Performance vs Meta ({periodo})",
+            font=dict(size=18, color='#FAFAFA', family="sans-serif"),
+            x=0.01
+        ),
+        plot_bgcolor='rgba(0,0,0,0)',  # Fundo 100% invisível
+        paper_bgcolor='rgba(0,0,0,0)', # Fundo 100% invisível
+        font=dict(color='#A0AEC0', family="sans-serif"),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom", y=1.05,
+            xanchor="right", x=1,
+            bgcolor='rgba(255,255,255,0.05)', # Caixa de legenda translúcida
+            bordercolor='rgba(255,255,255,0.1)',
+            borderwidth=1,
+            font=dict(size=12, color="white")
+        ),
+        margin=dict(l=20, r=20, t=80, b=20),
+        hovermode="x unified", # Tooltip junta todas as infos num único card ao passar o mouse
+        xaxis=dict(
+            showgrid=False,
+            linecolor='rgba(255,255,255,0.1)',
+            tickfont=dict(size=14, color='white', family="Arial Black")
+        ),
+        yaxis=dict(
+            title='',
+            showgrid=True,
+            gridcolor='rgba(255,255,255,0.05)', # Gridline quase invisível
+            gridwidth=1,
+            zeroline=True,
+            zerolinecolor='rgba(255,255,255,0.2)'
+        ),
+        barmode='overlay' # Permite que a linha flutue por cima da barra sem empurrá-la pro lado
+    )
+    
+    # Aplica arredondamento nas pontas das barras (Requer versões recentes do Plotly)
+    try:
+        fig.update_traces(marker_cornerradius=5, selector=dict(type='bar'))
+    except ValueError:
+        pass # Fallback caso a versão do servidor ainda não suporte cornerradius
+
     return fig
-
+    
 def desenhar_grafico_anual_agrupado(df_ano, metas_dict, posicoes, metrica_db, prefixo_meta, titulo):
     fig = go.Figure()
     from motor import ORDEM_MESES_PADRAO
