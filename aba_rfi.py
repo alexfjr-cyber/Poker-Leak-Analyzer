@@ -22,6 +22,38 @@ def renderizar(df_banco, ano_sel, anos_disp, metas_globais):
     vol_anual = int(df_geral['Total_Maos_Mes'].iloc[0]) if not df_geral.empty else int(df_ano['Total_Hands'].sum())
     st.markdown("---")
 
+    # --- NOVO: PAINEL DE KPI DINÂMICO ---
+    st.subheader("🎯 Resumo de Performance Anual (RFI)")
+    
+    # Cria 5 colunas para acomodar todas as posições da mesa
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    # Dicionário para capturar os dados reais do df_geral antes de desenhar os cards
+    kpi = {}
+    for p in ['EP', 'MP', 'CO', 'BU', 'SB']:
+        real = 0.0
+        if not df_geral.empty:
+            linha = df_geral[df_geral['Posicao'] == p]
+            if not linha.empty:
+                real = float(linha['RFI'].iloc[0])
+        meta = metas_globais.get(f'RFI_{p}', 0.0)
+        kpi[p] = {'real': real, 'meta': meta}
+
+    # Desenhando os Cards com cálculo automático de desvio (Delta)
+    with col1:
+        st.metric(label=f"EP (Meta: {kpi['EP']['meta']:.1f}%)", value=f"{kpi['EP']['real']:.1f}%", delta=f"{kpi['EP']['real'] - kpi['EP']['meta']:+.1f}%")
+    with col2:
+        st.metric(label=f"MP (Meta: {kpi['MP']['meta']:.1f}%)", value=f"{kpi['MP']['real']:.1f}%", delta=f"{kpi['MP']['real'] - kpi['MP']['meta']:+.1f}%")
+    with col3:
+        st.metric(label=f"CO (Meta: {kpi['CO']['meta']:.1f}%)", value=f"{kpi['CO']['real']:.1f}%", delta=f"{kpi['CO']['real'] - kpi['CO']['meta']:+.1f}%")
+    with col4:
+        st.metric(label=f"BU (Meta: {kpi['BU']['meta']:.1f}%)", value=f"{kpi['BU']['real']:.1f}%", delta=f"{kpi['BU']['real'] - kpi['BU']['meta']:+.1f}%")
+    with col5:
+        st.metric(label=f"SB (Meta: {kpi['SB']['meta']:.1f}%)", value=f"{kpi['SB']['real']:.1f}%", delta=f"{kpi['SB']['real'] - kpi['SB']['meta']:+.1f}%")
+
+    st.markdown("---")
+    # -----------------------------------
+
     # --- 1. RELATÓRIO ANUAL CONSOLIDADO ---
     c_tit_anual, c_vol_anual = st.columns([3, 1])
     c_tit_anual.subheader(f"📈 Relatório Anual Consolidado ({ano_aba})")
