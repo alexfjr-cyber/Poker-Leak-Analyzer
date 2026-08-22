@@ -51,6 +51,8 @@ import plotly.graph_objects as go
 
 import plotly.graph_objects as go
 
+import plotly.graph_objects as go
+
 def desenhar_grafico_stat_vs_meta(eixos_x, valores_reais, valores_meta, nome_stat, periodo, ano):
     fig = go.Figure()
 
@@ -80,8 +82,8 @@ def desenhar_grafico_stat_vs_meta(eixos_x, valores_reais, valores_meta, nome_sta
         name="Meta Ideal",
         marker=dict(
             color='#00e5ff', # Ciano Neon para destacar a meta
-            opacity=0.4,     # Transparente para dar elegância e não brigar com a barra real
-            line=dict(color='#00e5ff', width=1.5, dash='dot')
+            opacity=0.4,     # Transparente para dar elegância
+            line=dict(color='#00e5ff', width=1.5) # CORRIGIDO: Removido o dash='dot' que causava o erro
         ),
         text=[f"{v:.1f}%" for v in valores_meta],
         textposition='outside',
@@ -109,7 +111,7 @@ def desenhar_grafico_stat_vs_meta(eixos_x, valores_reais, valores_meta, nome_sta
             font=dict(size=12, color="white")
         ),
         margin=dict(l=20, r=20, t=80, b=20),
-        barmode='group', # Mantém as barras agrupadas lado a lado de forma independente
+        barmode='group', # Mantém as barras agrupadas lado a lado
         xaxis=dict(
             showgrid=False,
             linecolor='rgba(255,255,255,0.1)',
