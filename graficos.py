@@ -135,40 +135,93 @@ def desenhar_grafico_stat_vs_meta(eixos_x, valores_reais, valores_meta, nome_sta
 
     return fig
     
-def desenhar_grafico_anual_agrupado(df_ano, metas_dict, posicoes, metrica_db, prefixo_meta, titulo):
+def desenhar_grafico_anual_agrupado(df_ano, metas_globais, posicoes, stat_nome, prefixo_meta, titulo):
     fig = go.Figure()
-    from motor import ORDEM_MESES_PADRAO
-    df_temporal = df_ano[df_ano['Mes'] != 'Geral']
-    meses_presentes = [m for m in ORDEM_MESES_PADRAO if m in df_temporal['Mes'].values]
-    cores_meses = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf', '#109618', '#990099']
     
-    # 1. Desenha as barras de todos os meses primeiro
-    for i, mes in enumerate(meses_presentes):
-        valores_mes = []
-        for p in posicoes:
-            linha = df_temporal[(df_temporal['Posicao'] == p) & (df_temporal['Mes'] == mes)]
-            valores_mes.append(float(linha[metrica_db].iloc[0]) if not linha.empty else 0.0)
-            
-        fig.add_trace(go.Bar(x=posicoes, y=valores_mes, name=mes, marker_color=cores_meses[i % len(cores_meses)], text=[f"{v:.1f}%" if v > 0 else "" for v in valores_mes], textposition='inside', textfont=dict(size=10)))
+    # Filtra apenas os meses reais (remove a linha 'Geral' do gráfico de progressão)
+    df_meses = df_ano[df_ano['Mes'] != 'Geral']
+    meses_ordenados = df_meses['Mes'].unique().tolist()
+    
+    # Paleta de Cores Premium para as 5 posições (Neon colors)
+    paleta = {
+        'EP': '#b388ff', # Roxo Neon
+        'MP': '#82b1ff', # Azul Neon
+        'CO': '#84ffff', # Ciano
+        'BU': '#b9f6ca', # Verde Neon
+        'SB': '#ffd180'  # Laranja/Amarelo Neon
+    }
 
-    # 2. Marcador Fake para Legenda
-    fig.add_trace(go.Scatter(x=[posicoes[0]], y=[None], mode='lines', name='🎯 Meta', line=dict(color='#ffea00', width=4)))
+    for pos in posicoes:
+        linha_pos = df_meses[df_meses['Posicao'] == pos]
+        valores_reais = linha_pos[stat_nome].tolist()
+        meta = metas_globais.get(f"{prefixo_meta}{pos}", 0.0)
+        cor = paleta.get(pos, '#ffffff')
+        
+        # 1. As Barras Reais (Performance do mês)
+        fig.add_trace(go.Bar(
+            x=linha_pos['Mes'],
+            y=valores_reais,
+            name=f"{pos} Real",
+            marker=dict(
+                color=cor, 
+                opacity=0.75,
+                line=dict(color=cor, width=1.5)
+            ),
+            hovertemplate=f"<b>Posição: {pos}</b><br>Mês: %{{x}}<br>Realizado: %{{y:.1f}}%<extra></extra>"
+        ))
+        
+        # 2. A Linha da Meta (Transversal cruzando todos os meses)
+        fig.add_trace(go.Scatter(
+            x=meses_ordenados,
+            y=[meta] * len(meses_ordenados),
+            name=f"Meta {pos}",
+            mode='lines',
+            line=dict(color=cor, width=2, dash='dot'),
+            showlegend=False, # Oculto na legenda para não poluir, pois a cor já indica a posição
+            hoverinfo='skip'  # O mouse não precisa focar na linha, apenas nas barras
+        ))
 
-    # 3. Desenho das linhas de meta sobrepostas
-    shapes = []
-    for i, p in enumerate(posicoes):
-        meta = metas_dict.get(f"{prefixo_meta}{p}" if prefixo_meta else metrica_db, 0.0)
-        shapes.append(dict(type="line", x0=i-0.45, x1=i+0.45, y0=meta, y1=meta, line=dict(color="#ffea00", width=4), xref="x", yref="y", layer="above"))
-
+    # 3. Layout Moderno
     fig.update_layout(
-        title=f"📊 {titulo}", 
-        barmode='group', 
-        plot_bgcolor='rgba(0,0,0,0)', 
-        paper_bgcolor='rgba(0,0,0,0)', 
-        font=dict(color='white'), 
-        legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="right", x=1), 
-        yaxis=dict(title='%', gridcolor='rgba(255,255,255,0.1)'), 
-        xaxis=dict(type='category', gridcolor='rgba(255,255,255,0.05)'), # Eixo X forçado como categoria
-        shapes=shapes
+        title=dict(
+            text=f"<b>{titulo}</b>",
+            font=dict(size=18, color='#FAFAFA', family="sans-serif"),
+            x=0.01
+        ),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#A0AEC0', family="sans-serif"),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom", y=1.05,
+            xanchor="right", x=1,
+            bgcolor='rgba(255,255,255,0.05)',
+            bordercolor='rgba(255,255,255,0.1)',
+            borderwidth=1,
+            font=dict(size=12, color="white")
+        ),
+        margin=dict(l=20, r=20, t=80, b=20),
+        barmode='group', # Agrupa as barras do mesmo mês lado a lado
+        hovermode="x unified",
+        xaxis=dict(
+            showgrid=False,
+            linecolor='rgba(255,255,255,0.1)',
+            tickfont=dict(size=12, color='white', family="Arial Black")
+        ),
+        yaxis=dict(
+            title='',
+            showgrid=True,
+            gridcolor='rgba(255,255,255,0.05)',
+            gridwidth=1,
+            zeroline=True,
+            zerolinecolor='rgba(255,255,255,0.2)'
+        )
     )
+    
+    # Arredondamento estético nas pontas das barras
+    try:
+        fig.update_traces(marker_cornerradius=4, selector=dict(type='bar'))
+    except ValueError:
+        pass
+
     return fig
