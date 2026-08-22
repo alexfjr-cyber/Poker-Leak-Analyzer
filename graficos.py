@@ -140,14 +140,14 @@ def desenhar_grafico_anual_agrupado(df_ano, metas_globais, posicoes, stat_nome, 
     # Filtra apenas os meses reais
     df_meses = df_ano[df_ano['Mes'] != 'Geral']
     
-    # Paleta de cores para cada posição
+    # Paleta de cores para as barras
     paleta = {'EP': '#b388ff', 'MP': '#82b1ff', 'CO': '#84ffff', 'BU': '#b9f6ca', 'SB': '#ffd180'}
 
-    # Cria 5 sub-gráficos lado a lado (um para cada posição)
+    # Cria 5 sub-gráficos lado a lado
     fig = make_subplots(
         rows=1, cols=len(posicoes), 
         subplot_titles=posicoes,
-        shared_yaxes=True, # Mantém a mesma escala de altura para todos
+        shared_yaxes=True,
         horizontal_spacing=0.02
     )
 
@@ -167,12 +167,14 @@ def desenhar_grafico_anual_agrupado(df_ano, metas_globais, posicoes, stat_nome, 
             hovertemplate=f"<b>Posição: {pos}</b><br>Mês: %{{x}}<br>Realizado: %{{y:.1f}}%<extra></extra>"
         ), row=1, col=i)
         
-        # Linha transversal da meta exclusiva daquela posição
+        # Linha transversal da meta (AGORA DESTAQUE MÁXIMO)
+        # Sólida, mais grossa, e com diamantes sobrepondo exatamente cada coluna
         fig.add_trace(go.Scatter(
             x=meses,
             y=[meta] * len(meses),
-            mode='lines',
-            line=dict(color='#00e5ff', width=2, dash='dot'),
+            mode='lines+markers',
+            line=dict(color='#00e5ff', width=3), # Ciano Neon grosso e sólido
+            marker=dict(symbol='diamond', size=10, color='#0e1117', line=dict(width=2, color='#00e5ff')),
             name=f"Meta {pos}",
             hoverinfo='skip'
         ), row=1, col=i)
@@ -183,15 +185,13 @@ def desenhar_grafico_anual_agrupado(df_ano, metas_globais, posicoes, stat_nome, 
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         font=dict(color='#A0AEC0', family="sans-serif"),
-        showlegend=False, # Ocultamos a legenda pois os títulos de cada quadro já explicam
+        showlegend=False, 
         margin=dict(l=20, r=20, t=80, b=20)
     )
     
-    # Limpeza dos eixos de todos os sub-gráficos
     fig.update_xaxes(showgrid=False, linecolor='rgba(255,255,255,0.1)', tickfont=dict(size=11, color='white'))
     fig.update_yaxes(showgrid=True, gridcolor='rgba(255,255,255,0.05)', gridwidth=1, zeroline=False)
 
-    # Arredondamento
     try:
         fig.update_traces(marker_cornerradius=4, selector=dict(type='bar'))
     except ValueError:
