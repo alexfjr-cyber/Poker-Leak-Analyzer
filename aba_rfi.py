@@ -22,13 +22,10 @@ def renderizar(df_banco, ano_sel, anos_disp, metas_globais):
     vol_anual = int(df_geral['Total_Maos_Mes'].iloc[0]) if not df_geral.empty else int(df_ano['Total_Hands'].sum())
     st.markdown("---")
 
-    # --- NOVO: PAINEL DE KPI DINÂMICO ---
-    st.subheader("🎯 Resumo de Performance Anual (RFI)")
-    
-    # Cria 5 colunas para acomodar todas as posições da mesa
+    # --- 🎯 PAINEL DE KPI FIXO (Resumo Executivo) ---
+    st.subheader("🎯 Resumo de Performance Anual")
     col1, col2, col3, col4, col5 = st.columns(5)
     
-    # Dicionário para capturar os dados reais do df_geral antes de desenhar os cards
     kpi = {}
     for p in ['EP', 'MP', 'CO', 'BU', 'SB']:
         real = 0.0
@@ -39,7 +36,6 @@ def renderizar(df_banco, ano_sel, anos_disp, metas_globais):
         meta = metas_globais.get(f'RFI_{p}', 0.0)
         kpi[p] = {'real': real, 'meta': meta}
 
-    # Desenhando os Cards com cálculo automático de desvio (Delta)
     with col1:
         st.metric(label=f"EP (Meta: {kpi['EP']['meta']:.1f}%)", value=f"{kpi['EP']['real']:.1f}%", delta=f"{kpi['EP']['real'] - kpi['EP']['meta']:+.1f}%")
     with col2:
@@ -52,60 +48,73 @@ def renderizar(df_banco, ano_sel, anos_disp, metas_globais):
         st.metric(label=f"SB (Meta: {kpi['SB']['meta']:.1f}%)", value=f"{kpi['SB']['real']:.1f}%", delta=f"{kpi['SB']['real'] - kpi['SB']['meta']:+.1f}%")
 
     st.markdown("---")
-    # -----------------------------------
 
-    # --- 1. RELATÓRIO ANUAL CONSOLIDADO ---
-    c_tit_anual, c_vol_anual = st.columns([3, 1])
-    c_tit_anual.subheader(f"📈 Relatório Anual Consolidado ({ano_aba})")
-    c_vol_anual.info(f"📊 Volume: {vol_anual:,} mãos", icon="🧮")
-
-    tabela_anual = []
-    val_real_geral, val_meta_geral = [], []
-    if not df_geral.empty:
-        for p in ['EP', 'MP', 'CO', 'BU', 'SB']:
-            linha = df_geral[df_geral['Posicao'] == p]
-            v = int(linha['Total_Hands'].iloc[0]) if not linha.empty else 0
-            r = float(linha['RFI'].iloc[0]) if not linha.empty else 0.0
-            m = metas_globais.get(f'RFI_{p}', 0.0)
-            
-            val_real_geral.append(r)
-            val_meta_geral.append(m)
-            
-            st_badge, obs = avaliar_desvio_rfi(r - m, p)
-            tabela_anual.append({"Posição": p, "Volume": f"{v:,}", "RFI Real": f"{r:.1f}%", "Meta Ideal": f"{m:.1f}%", "Desvio": f"{r-m:+.1f}%", "Avaliação": st_badge, "Orientação": obs})
-        
-        st.plotly_chart(graficos.desenhar_grafico_stat_vs_meta(['EP', 'MP', 'CO', 'BU', 'SB'], val_real_geral, val_meta_geral, 'RFI', 'Geral (Ano)', ano_aba), use_container_width=True)
-        st.dataframe(pd.DataFrame(tabela_anual), use_container_width=True, hide_index=True)
-    else:
-        st.info("Arquivo 'geral' anual não encontrado para este ano.")
-
+    # --- 🔘 SELETOR DE VISUALIZAÇÃO (Renderização Preguiçosa) ---
+    visao_selecionada = st.radio(
+        "🔎 Selecione a profundidade da análise:",
+        ["📉 Anual Consolidado (Geral)", "📆 Inspeção Mensal (Detalhe)", "📊 Progressão Anual (Linha do Tempo)"],
+        horizontal=True
+    )
     st.markdown("---")
-    
-    # --- 2. INSPEÇÃO MENSAL ---
-    st.subheader("📆 Inspeção Mensal Detalhada")
-    meses_disp = [m for m in motor.ORDEM_MESES_PADRAO if m in df_ano[df_ano['Mes'] != 'Geral']['Mes'].unique().tolist()]
-    
-    if meses_disp:
-        mes_sel = st.selectbox("Selecione o Mês:", meses_disp, key="rfi_mes")
-        df_mes = df_ano[df_ano['Mes'] == mes_sel]
-        vol_mensal = int(df_mes['Total_Maos_Mes'].iloc[0]) if not df_mes.empty else 0
-        st.caption(f"Volume do mês selecionado: {vol_mensal:,} mãos.")
-        
-        tab_mes, v_real, v_meta = [], [], []
-        for p in ['EP', 'MP', 'CO', 'BU', 'SB']:
-            linha = df_mes[df_mes['Posicao'] == p]
-            v = int(linha['Total_Hands'].iloc[0]) if not linha.empty else 0
-            r = float(linha['RFI'].iloc[0]) if not linha.empty else 0.0
-            m = metas_globais.get(f'RFI_{p}', 0.0)
-            v_real.append(r); v_meta.append(m)
-            st_badge, obs = avaliar_desvio_rfi(r - m, p)
-            tab_mes.append({"Posição": p, "Volume": f"{v:,}", "RFI Real": f"{r:.1f}%", "Meta Ideal": f"{m:.1f}%", "Desvio": f"{r-m:+.1f}%", "Avaliação": st_badge, "Orientação": obs})
-            
-        st.plotly_chart(graficos.desenhar_grafico_stat_vs_meta(['EP', 'MP', 'CO', 'BU', 'SB'], v_real, v_meta, 'RFI', mes_sel, ano_aba), use_container_width=True)
-        st.dataframe(pd.DataFrame(tab_mes), use_container_width=True, hide_index=True)
 
-    # --- 3. PROGRESSÃO ANUAL ---
-    st.markdown("---")
-    st.subheader("📊 Relatório de Progressão Anual")
-    st.markdown("Acompanhe a evolução do seu Open Raise mês a mês e avalie a consistência das correções.")
-    st.plotly_chart(graficos.desenhar_grafico_anual_agrupado(df_ano, metas_globais, ['EP', 'MP', 'CO', 'BU', 'SB'], 'RFI', 'RFI_', "Progressão Mensal de RFI vs Meta"), use_container_width=True)
+
+    # ==============================================================
+    # MOTOR CONDICIONAL - O código abaixo só roda se for selecionado
+    # ==============================================================
+
+    # 1️⃣ VISÃO: ANUAL CONSOLIDADO
+    if visao_selecionada == "📉 Anual Consolidado (Geral)":
+        c_tit_anual, c_vol_anual = st.columns([3, 1])
+        c_tit_anual.subheader(f"📉 Relatório Anual Consolidado ({ano_aba})")
+        c_vol_anual.info(f"📊 Volume: {vol_anual:,} mãos", icon="🧮")
+
+        tabela_anual = []
+        val_real_geral, val_meta_geral = [], []
+        if not df_geral.empty:
+            for p in ['EP', 'MP', 'CO', 'BU', 'SB']:
+                linha = df_geral[df_geral['Posicao'] == p]
+                v = int(linha['Total_Hands'].iloc[0]) if not linha.empty else 0
+                r = float(linha['RFI'].iloc[0]) if not linha.empty else 0.0
+                m = metas_globais.get(f'RFI_{p}', 0.0)
+                
+                val_real_geral.append(r)
+                val_meta_geral.append(m)
+                
+                st_badge, obs = avaliar_desvio_rfi(r - m, p)
+                tabela_anual.append({"Posição": p, "Volume": f"{v:,}", "RFI Real": f"{r:.1f}%", "Meta Ideal": f"{m:.1f}%", "Desvio": f"{r-m:+.1f}%", "Avaliação": st_badge, "Orientação": obs})
+            
+            st.plotly_chart(graficos.desenhar_grafico_stat_vs_meta(['EP', 'MP', 'CO', 'BU', 'SB'], val_real_geral, val_meta_geral, 'RFI', 'Geral (Ano)', ano_aba), use_container_width=True)
+            st.dataframe(pd.DataFrame(tabela_anual), use_container_width=True, hide_index=True)
+        else:
+            st.info("Arquivo 'geral' anual não encontrado para este ano.")
+
+    # 2️⃣ VISÃO: INSPEÇÃO MENSAL
+    elif visao_selecionada == "📆 Inspeção Mensal (Detalhe)":
+        st.subheader("📆 Inspeção Mensal Detalhada")
+        meses_disp = [m for m in motor.ORDEM_MESES_PADRAO if m in df_ano[df_ano['Mes'] != 'Geral']['Mes'].unique().tolist()]
+        
+        if meses_disp:
+            # Dropdown para selecionar o mês fica restrito a esta visualização
+            mes_sel = st.selectbox("Selecione o Mês a investigar:", meses_disp, key="rfi_mes")
+            df_mes = df_ano[df_ano['Mes'] == mes_sel]
+            vol_mensal = int(df_mes['Total_Maos_Mes'].iloc[0]) if not df_mes.empty else 0
+            st.caption(f"Volume do mês selecionado: {vol_mensal:,} mãos.")
+            
+            tab_mes, v_real, v_meta = [], [], []
+            for p in ['EP', 'MP', 'CO', 'BU', 'SB']:
+                linha = df_mes[df_mes['Posicao'] == p]
+                v = int(linha['Total_Hands'].iloc[0]) if not linha.empty else 0
+                r = float(linha['RFI'].iloc[0]) if not linha.empty else 0.0
+                m = metas_globais.get(f'RFI_{p}', 0.0)
+                v_real.append(r); v_meta.append(m)
+                st_badge, obs = avaliar_desvio_rfi(r - m, p)
+                tab_mes.append({"Posição": p, "Volume": f"{v:,}", "RFI Real": f"{r:.1f}%", "Meta Ideal": f"{m:.1f}%", "Desvio": f"{r-m:+.1f}%", "Avaliação": st_badge, "Orientação": obs})
+                
+            st.plotly_chart(graficos.desenhar_grafico_stat_vs_meta(['EP', 'MP', 'CO', 'BU', 'SB'], v_real, v_meta, 'RFI', mes_sel, ano_aba), use_container_width=True)
+            st.dataframe(pd.DataFrame(tab_mes), use_container_width=True, hide_index=True)
+
+    # 3️⃣ VISÃO: PROGRESSÃO ANUAL
+    elif visao_selecionada == "📊 Progressão Anual (Linha do Tempo)":
+        st.subheader("📊 Relatório de Progressão Anual")
+        st.markdown("Acompanhe a evolução do seu Open Raise mês a mês e avalie a consistência das correções.")
+        st.plotly_chart(graficos.desenhar_grafico_anual_agrupado(df_ano, metas_globais, ['EP', 'MP', 'CO', 'BU', 'SB'], 'RFI', 'RFI_', "Progressão Mensal de RFI vs Meta"), use_container_width=True)
