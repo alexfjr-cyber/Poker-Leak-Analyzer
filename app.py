@@ -120,3 +120,4 @@ else:
     st.title(menu)
     st.warning("🚧 **Módulo em Construção** 🚧")
     st.markdown("Esta fase está mapeada na arquitetura do sistema e será desenvolvida em breve.")
+    # Forçando atualização da nuvem
