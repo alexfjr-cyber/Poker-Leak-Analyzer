@@ -1,4 +1,5 @@
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def desenhar_grafico_winrate_pareado(eixo_x, bb_real, ev_bb, titulo):
     fig = go.Figure()
@@ -136,89 +137,61 @@ def desenhar_grafico_stat_vs_meta(eixos_x, valores_reais, valores_meta, nome_sta
     return fig
     
 def desenhar_grafico_anual_agrupado(df_ano, metas_globais, posicoes, stat_nome, prefixo_meta, titulo):
-    fig = go.Figure()
-    
-    # Filtra apenas os meses reais (remove a linha 'Geral' do gráfico de progressão)
+    # Filtra apenas os meses reais
     df_meses = df_ano[df_ano['Mes'] != 'Geral']
-    meses_ordenados = df_meses['Mes'].unique().tolist()
     
-    # Paleta de Cores Premium para as 5 posições (Neon colors)
-    paleta = {
-        'EP': '#b388ff', # Roxo Neon
-        'MP': '#82b1ff', # Azul Neon
-        'CO': '#84ffff', # Ciano
-        'BU': '#b9f6ca', # Verde Neon
-        'SB': '#ffd180'  # Laranja/Amarelo Neon
-    }
+    # Paleta de cores para cada posição
+    paleta = {'EP': '#b388ff', 'MP': '#82b1ff', 'CO': '#84ffff', 'BU': '#b9f6ca', 'SB': '#ffd180'}
 
-    for pos in posicoes:
+    # Cria 5 sub-gráficos lado a lado (um para cada posição)
+    fig = make_subplots(
+        rows=1, cols=len(posicoes), 
+        subplot_titles=posicoes,
+        shared_yaxes=True, # Mantém a mesma escala de altura para todos
+        horizontal_spacing=0.02
+    )
+
+    for i, pos in enumerate(posicoes, start=1):
         linha_pos = df_meses[df_meses['Posicao'] == pos]
         valores_reais = linha_pos[stat_nome].tolist()
+        meses = linha_pos['Mes'].tolist()
         meta = metas_globais.get(f"{prefixo_meta}{pos}", 0.0)
-        cor = paleta.get(pos, '#ffffff')
+        cor = paleta.get(pos, '#00e676')
         
-        # 1. As Barras Reais (Performance do mês)
+        # Barra do mês
         fig.add_trace(go.Bar(
-            x=linha_pos['Mes'],
+            x=meses,
             y=valores_reais,
             name=f"{pos} Real",
-            marker=dict(
-                color=cor, 
-                opacity=0.75,
-                line=dict(color=cor, width=1.5)
-            ),
+            marker=dict(color=cor, opacity=0.85, line=dict(color=cor, width=1)),
             hovertemplate=f"<b>Posição: {pos}</b><br>Mês: %{{x}}<br>Realizado: %{{y:.1f}}%<extra></extra>"
-        ))
+        ), row=1, col=i)
         
-        # 2. A Linha da Meta (Transversal cruzando todos os meses)
+        # Linha transversal da meta exclusiva daquela posição
         fig.add_trace(go.Scatter(
-            x=meses_ordenados,
-            y=[meta] * len(meses_ordenados),
-            name=f"Meta {pos}",
+            x=meses,
+            y=[meta] * len(meses),
             mode='lines',
-            line=dict(color=cor, width=2, dash='dot'),
-            showlegend=False, # Oculto na legenda para não poluir, pois a cor já indica a posição
-            hoverinfo='skip'  # O mouse não precisa focar na linha, apenas nas barras
-        ))
+            line=dict(color='#00e5ff', width=2, dash='dot'),
+            name=f"Meta {pos}",
+            hoverinfo='skip'
+        ), row=1, col=i)
 
-    # 3. Layout Moderno
+    # Layout Premium
     fig.update_layout(
-        title=dict(
-            text=f"<b>{titulo}</b>",
-            font=dict(size=18, color='#FAFAFA', family="sans-serif"),
-            x=0.01
-        ),
+        title=dict(text=f"<b>{titulo}</b>", font=dict(size=18, color='#FAFAFA', family="sans-serif"), x=0.01),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         font=dict(color='#A0AEC0', family="sans-serif"),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom", y=1.05,
-            xanchor="right", x=1,
-            bgcolor='rgba(255,255,255,0.05)',
-            bordercolor='rgba(255,255,255,0.1)',
-            borderwidth=1,
-            font=dict(size=12, color="white")
-        ),
-        margin=dict(l=20, r=20, t=80, b=20),
-        barmode='group', # Agrupa as barras do mesmo mês lado a lado
-        hovermode="x unified",
-        xaxis=dict(
-            showgrid=False,
-            linecolor='rgba(255,255,255,0.1)',
-            tickfont=dict(size=12, color='white', family="Arial Black")
-        ),
-        yaxis=dict(
-            title='',
-            showgrid=True,
-            gridcolor='rgba(255,255,255,0.05)',
-            gridwidth=1,
-            zeroline=True,
-            zerolinecolor='rgba(255,255,255,0.2)'
-        )
+        showlegend=False, # Ocultamos a legenda pois os títulos de cada quadro já explicam
+        margin=dict(l=20, r=20, t=80, b=20)
     )
     
-    # Arredondamento estético nas pontas das barras
+    # Limpeza dos eixos de todos os sub-gráficos
+    fig.update_xaxes(showgrid=False, linecolor='rgba(255,255,255,0.1)', tickfont=dict(size=11, color='white'))
+    fig.update_yaxes(showgrid=True, gridcolor='rgba(255,255,255,0.05)', gridwidth=1, zeroline=False)
+
+    # Arredondamento
     try:
         fig.update_traces(marker_cornerradius=4, selector=dict(type='bar'))
     except ValueError:
